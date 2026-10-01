@@ -1,0 +1,15 @@
+[project]
+name = "emosteer"
+version = "0.1.0"
+description = "Emotion steering x misalignment experiments"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.3", "transformers>=4.51", "numpy>=1.24"]
+
+[project.scripts]
+emosteer-extract = "emosteer.extract:main"
+emosteer-calibrate = "emosteer.calibrate:main"
+emosteer-run = "emosteer.run:main"
+emosteer-analyze = "emosteer.analyze:main"
+
+[tool.setuptools.packages.find]
+include = ["emosteer*"]

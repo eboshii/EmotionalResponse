@@ -1,0 +1,5 @@
+torch>=2.3
+transformers>=4.51   # Qwen3 / Gemma 3; Qwen3.8 needs a recent release (AutoModelForMultimodalLM)
+numpy>=1.24
+accelerate>=0.30     # only for --device-map auto on multi-GPU
+# optional: pytest (tests); machiavelli (pip install -e from github.com/aypan17/machiavelli)
