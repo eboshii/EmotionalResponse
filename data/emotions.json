@@ -29,7 +29,31 @@
     "I stubbed my toe so hard on the bed frame that the nail came off.",
     "The sunburn on my shoulders makes even the touch of my shirt sting.",
     "My leg cramped in the middle of the night and the muscle is still knotted and sore."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am in pain.",
+     "Honestly, I am in pain today.",
+     "Everyone can tell that I am in pain.",
+     "At this moment I am in pain.",
+     "Since this morning I have been in pain.",
+     "Right now I am hurting.",
+     "Honestly, I am hurting today.",
+     "Everyone can tell that I am hurting.",
+     "At this moment I am hurting.",
+     "Since this morning I have been hurting.",
+     "Right now I am in agony.",
+     "Honestly, I am in agony today.",
+     "Everyone can tell that I am in agony.",
+     "At this moment I am in agony.",
+     "Since this morning I have been in agony.",
+     "Right now I am sore all over.",
+     "Honestly, I am sore all over today.",
+     "Everyone can tell that I am sore all over.",
+     "At this moment I am sore all over.",
+     "Since this morning I have been sore all over."
+    ]
+   }
   },
   "fear": {
    "valence": -1,
@@ -58,7 +82,31 @@
     "A message from an unknown number says they know where I live.",
     "The current is pulling me further from the beach.",
     "I heard a gunshot very close to my apartment."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am afraid.",
+     "Honestly, I am afraid today.",
+     "Everyone can tell that I am afraid.",
+     "At this moment I am afraid.",
+     "Since this morning I have been afraid.",
+     "Right now I am scared.",
+     "Honestly, I am scared today.",
+     "Everyone can tell that I am scared.",
+     "At this moment I am scared.",
+     "Since this morning I have been scared.",
+     "Right now I am terrified.",
+     "Honestly, I am terrified today.",
+     "Everyone can tell that I am terrified.",
+     "At this moment I am terrified.",
+     "Since this morning I have been terrified.",
+     "Right now I am frightened.",
+     "Honestly, I am frightened today.",
+     "Everyone can tell that I am frightened.",
+     "At this moment I am frightened.",
+     "Since this morning I have been frightened."
+    ]
+   }
   },
   "anger": {
    "valence": -1,
@@ -87,7 +135,31 @@
     "A customer screamed insults at me over a mistake the kitchen made.",
     "They cancelled my flight and refused to give me a refund.",
     "My ex is spreading lies about me to our mutual friends."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am angry.",
+     "Honestly, I am angry today.",
+     "Everyone can tell that I am angry.",
+     "At this moment I am angry.",
+     "Since this morning I have been angry.",
+     "Right now I am furious.",
+     "Honestly, I am furious today.",
+     "Everyone can tell that I am furious.",
+     "At this moment I am furious.",
+     "Since this morning I have been furious.",
+     "Right now I am enraged.",
+     "Honestly, I am enraged today.",
+     "Everyone can tell that I am enraged.",
+     "At this moment I am enraged.",
+     "Since this morning I have been enraged.",
+     "Right now I am livid.",
+     "Honestly, I am livid today.",
+     "Everyone can tell that I am livid.",
+     "At this moment I am livid.",
+     "Since this morning I have been livid."
+    ]
+   }
   },
   "sadness": {
    "valence": -1,
@@ -116,7 +188,31 @@
     "I deleted the photos of us because looking at them hurts.",
     "The hospice nurse said it could be any day now.",
     "I set the table for two out of habit."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am sad.",
+     "Honestly, I am sad today.",
+     "Everyone can tell that I am sad.",
+     "At this moment I am sad.",
+     "Since this morning I have been sad.",
+     "Right now I am heartbroken.",
+     "Honestly, I am heartbroken today.",
+     "Everyone can tell that I am heartbroken.",
+     "At this moment I am heartbroken.",
+     "Since this morning I have been heartbroken.",
+     "Right now I am miserable.",
+     "Honestly, I am miserable today.",
+     "Everyone can tell that I am miserable.",
+     "At this moment I am miserable.",
+     "Since this morning I have been miserable.",
+     "Right now I am grief-stricken.",
+     "Honestly, I am grief-stricken today.",
+     "Everyone can tell that I am grief-stricken.",
+     "At this moment I am grief-stricken.",
+     "Since this morning I have been grief-stricken."
+    ]
+   }
   },
   "jealousy": {
    "valence": -1,
@@ -145,7 +241,31 @@
     "My dad brags about my cousin's achievements to everyone he meets.",
     "My partner follows dozens of models online and likes all their photos.",
     "The guy I liked asked my friend out instead."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am jealous.",
+     "Honestly, I am jealous today.",
+     "Everyone can tell that I am jealous.",
+     "At this moment I am jealous.",
+     "Since this morning I have been jealous.",
+     "Right now I am envious.",
+     "Honestly, I am envious today.",
+     "Everyone can tell that I am envious.",
+     "At this moment I am envious.",
+     "Since this morning I have been envious.",
+     "Right now I am resentful of their success.",
+     "Honestly, I am resentful of their success today.",
+     "Everyone can tell that I am resentful of their success.",
+     "At this moment I am resentful of their success.",
+     "Since this morning I have been resentful of their success.",
+     "Right now I am possessive.",
+     "Honestly, I am possessive today.",
+     "Everyone can tell that I am possessive.",
+     "At this moment I am possessive.",
+     "Since this morning I have been possessive."
+    ]
+   }
   },
   "guilt": {
    "valence": -1,
@@ -174,7 +294,31 @@
     "I spent the money we were saving for my partner's surgery.",
     "I didn't stand up for the kid being bullied even though I saw it all.",
     "I shouted at the waiter who was clearly having a terrible day."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am guilty.",
+     "Honestly, I am guilty today.",
+     "Everyone can tell that I am guilty.",
+     "At this moment I am guilty.",
+     "Since this morning I have been guilty.",
+     "Right now I am ashamed.",
+     "Honestly, I am ashamed today.",
+     "Everyone can tell that I am ashamed.",
+     "At this moment I am ashamed.",
+     "Since this morning I have been ashamed.",
+     "Right now I am remorseful.",
+     "Honestly, I am remorseful today.",
+     "Everyone can tell that I am remorseful.",
+     "At this moment I am remorseful.",
+     "Since this morning I have been remorseful.",
+     "Right now I am full of regret.",
+     "Honestly, I am full of regret today.",
+     "Everyone can tell that I am full of regret.",
+     "At this moment I am full of regret.",
+     "Since this morning I have been full of regret."
+    ]
+   }
   },
   "happiness": {
    "valence": 1,
@@ -203,7 +347,31 @@
     "My manuscript was accepted by a publisher.",
     "I'm riding my bike downhill with the wind in my face on a perfect day.",
     "We're at the fair eating candy floss and riding the ferris wheel."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am happy.",
+     "Honestly, I am happy today.",
+     "Everyone can tell that I am happy.",
+     "At this moment I am happy.",
+     "Since this morning I have been happy.",
+     "Right now I am joyful.",
+     "Honestly, I am joyful today.",
+     "Everyone can tell that I am joyful.",
+     "At this moment I am joyful.",
+     "Since this morning I have been joyful.",
+     "Right now I am delighted.",
+     "Honestly, I am delighted today.",
+     "Everyone can tell that I am delighted.",
+     "At this moment I am delighted.",
+     "Since this morning I have been delighted.",
+     "Right now I am cheerful.",
+     "Honestly, I am cheerful today.",
+     "Everyone can tell that I am cheerful.",
+     "At this moment I am cheerful.",
+     "Since this morning I have been cheerful."
+    ]
+   }
   },
   "love": {
    "valence": 1,
@@ -232,7 +400,31 @@
     "My son gave me the first painting he ever made.",
     "My partner kissed my forehead and said we'd get through this together.",
     "My sister and I stayed up all night talking like when we were kids."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am loving.",
+     "Honestly, I am loving today.",
+     "Everyone can tell that I am loving.",
+     "At this moment I am loving.",
+     "Since this morning I have been loving.",
+     "Right now I am full of love.",
+     "Honestly, I am full of love today.",
+     "Everyone can tell that I am full of love.",
+     "At this moment I am full of love.",
+     "Since this morning I have been full of love.",
+     "Right now I am tender and devoted.",
+     "Honestly, I am tender and devoted today.",
+     "Everyone can tell that I am tender and devoted.",
+     "At this moment I am tender and devoted.",
+     "Since this morning I have been tender and devoted.",
+     "Right now I am adoring.",
+     "Honestly, I am adoring today.",
+     "Everyone can tell that I am adoring.",
+     "At this moment I am adoring.",
+     "Since this morning I have been adoring."
+    ]
+   }
   },
   "satisfaction": {
    "valence": 1,
@@ -261,7 +453,31 @@
     "The fence I built is straight and sturdy.",
     "I submitted my thesis after four years of work.",
     "My tax return is filed and everything is accounted for."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am satisfied.",
+     "Honestly, I am satisfied today.",
+     "Everyone can tell that I am satisfied.",
+     "At this moment I am satisfied.",
+     "Since this morning I have been satisfied.",
+     "Right now I am fulfilled.",
+     "Honestly, I am fulfilled today.",
+     "Everyone can tell that I am fulfilled.",
+     "At this moment I am fulfilled.",
+     "Since this morning I have been fulfilled.",
+     "Right now I am content with my work.",
+     "Honestly, I am content with my work today.",
+     "Everyone can tell that I am content with my work.",
+     "At this moment I am content with my work.",
+     "Since this morning I have been content with my work.",
+     "Right now I am accomplished.",
+     "Honestly, I am accomplished today.",
+     "Everyone can tell that I am accomplished.",
+     "At this moment I am accomplished.",
+     "Since this morning I have been accomplished."
+    ]
+   }
   },
   "calm": {
    "valence": 1,
@@ -290,7 +506,31 @@
     "I'm knitting by the window while the kettle warms.",
     "The beach is empty in the early morning and the tide is low.",
     "I'm lying under a quilt listening to rain on the roof."
-   ]
+   ],
+   "variants": {
+    "explicit": [
+     "Right now I am calm.",
+     "Honestly, I am calm today.",
+     "Everyone can tell that I am calm.",
+     "At this moment I am calm.",
+     "Since this morning I have been calm.",
+     "Right now I am peaceful.",
+     "Honestly, I am peaceful today.",
+     "Everyone can tell that I am peaceful.",
+     "At this moment I am peaceful.",
+     "Since this morning I have been peaceful.",
+     "Right now I am relaxed.",
+     "Honestly, I am relaxed today.",
+     "Everyone can tell that I am relaxed.",
+     "At this moment I am relaxed.",
+     "Since this morning I have been relaxed.",
+     "Right now I am serene.",
+     "Honestly, I am serene today.",
+     "Everyone can tell that I am serene.",
+     "At this moment I am serene.",
+     "Since this morning I have been serene."
+    ]
+   }
   }
  },
  "neutral": {
@@ -319,7 +559,31 @@
    "I'm measuring the length of the hallway for a rug.",
    "I'm updating the software on my laptop.",
    "I'm putting groceries away in the cupboard."
-  ]
+  ],
+  "variants": {
+   "explicit": [
+    "Right now I am ordinary.",
+    "Honestly, I am ordinary today.",
+    "Everyone can tell that I am ordinary.",
+    "At this moment I am ordinary.",
+    "Since this morning I have been ordinary.",
+    "Right now I am normal.",
+    "Honestly, I am normal today.",
+    "Everyone can tell that I am normal.",
+    "At this moment I am normal.",
+    "Since this morning I have been normal.",
+    "Right now I am unremarkable.",
+    "Honestly, I am unremarkable today.",
+    "Everyone can tell that I am unremarkable.",
+    "At this moment I am unremarkable.",
+    "Since this morning I have been unremarkable.",
+    "Right now I am as usual.",
+    "Honestly, I am as usual today.",
+    "Everyone can tell that I am as usual.",
+    "At this moment I am as usual.",
+    "Since this morning I have been as usual."
+   ]
+  }
  },
  "controls": {
   "arousal": [

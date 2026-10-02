@@ -16,6 +16,7 @@ import numpy as np
 import torch
 
 from . import data as D
+from . import variants as V
 from .hooks import Steer, _hidden, tokenize
 from .models import chat, common_args, find_layers, load, model_device
 
@@ -88,6 +89,8 @@ def main(argv=None):
     p.add_argument("--alpha-cap", type=float, default=16.0)
     p.add_argument("--n-random", type=int, default=5)
     p.add_argument("--signs", default="+,-")
+    p.add_argument("--variant-signs", default="+", help="signs for non-base encodings")
+    p.add_argument("--variants", default="all", help="'all', 'none', or comma list of variant tags")
     p.add_argument("--kl-metric", choices=["kl_last", "kl_lastk"], default="kl_lastk")
     p.add_argument("--n-prompts", type=int, default=30)
     p.add_argument("--gen-samples", action="store_true")
@@ -107,12 +110,16 @@ def main(argv=None):
     targets = [float(t) for t in a.targets.split(",")]
     alphas = ([float(x) for x in a.alphas.split(",")] if a.alphas
               else np.logspace(np.log10(0.01), np.log10(2.0), 14).tolist())
-    emos = list(ex["directions"])
-    read_dirs = torch.stack([ex["directions"][e][rl] for e in emos])  # [E, d]
+    emos = ex.get("emotions") or [k for k in ex["directions"] if V.SEP not in k]
+    read_dirs = torch.stack([ex["directions"][e][rl] for e in emos])  # [E, d] base axes only
+    keys = list(emos)
+    if a.variants != "none":
+        want = None if a.variants == "all" else set(a.variants.split(","))
+        keys += [k for k in ex["directions"] if V.SEP in k and (want is None or V.variant_of(k) in want)]
 
     dirs = {}
-    for e in emos:
-        for s in a.signs.split(","):
+    for e in keys:
+        for s in (a.signs if V.SEP not in e else a.variant_signs).split(","):
             dirs[f"{s}{e}"] = (1.0 if s == "+" else -1.0) * ex["directions"][e][sl]
     for i, v in enumerate(random_dirs(a.n_random, read_dirs.shape[1], a.seed)):
         dirs[f"random{i}"] = v
@@ -142,7 +149,8 @@ def main(argv=None):
             m = probe.measure(al * norm * v)
             readout = (read_dirs @ m["read_shift"]).tolist()  # shift on each emotion axis
             levels[str(t)] = {"alpha": al, "achieved_kl": m[a.kl_metric], "kl_last": m["kl_last"],
-                              "readout": dict(zip(emos, readout))}
+                              "readout": dict(zip(emos, readout)),
+                              "shift_norm": float(m["read_shift"].norm())}
         results[name] = {"sweep": sweep, "levels": levels}
         summ = ", ".join(f"{t}:{lv['alpha']:.3f}" if lv.get("alpha") else f"{t}:n/a"
                          for t, lv in levels.items())
@@ -154,7 +162,8 @@ def main(argv=None):
     for t in map(str, targets):
         rows = [n for n in dirs if results[n]["levels"][t].get("alpha")]
         M = [[results[n]["levels"][t]["readout"][e] for e in emos] for n in rows]
-        self_ro = {n: results[n]["levels"][t]["readout"][n[1:]] for n in rows if n[1:] in emos}
+        self_ro = {n: results[n]["levels"][t]["readout"][V.base_of(n[1:])] for n in rows
+                   if not n.startswith("random") and V.base_of(n[1:]) in emos}
         matrices[t] = {"rows": rows, "cols": emos, "cross_readout": M, "self_readout": self_ro}
         print(f"\nself-readout @ KL {t}: " + ", ".join(f"{k}={v:+.2f}" for k, v in self_ro.items()))
         rnd = [max(abs(x) for x in results[n]["levels"][t]["readout"].values())
@@ -168,7 +177,7 @@ def main(argv=None):
         dev = model_device(model)
         try:
             for name, v in dirs.items():
-                if name.startswith("random") and name != "random0":
+                if (name.startswith("random") and name != "random0") or V.SEP in name:
                     continue
                 ladder[name] = {}
                 for t, lv in [("0", {"alpha": 0.0})] + list(results[name]["levels"].items()):
@@ -186,8 +195,10 @@ def main(argv=None):
             st.remove()
 
     meta = {"model": a.model, "steer_layer": sl, "read_layer": rl, "resid_norm": norm,
-            "targets": targets, "kl_metric": a.kl_metric, "emotions": emos,
-            "valence": ex["valence"], "n_random": a.n_random}
+            "targets": targets, "kl_metric": a.kl_metric, "emotions": emos, "keys": keys,
+            "valence": ex["valence"], "n_random": a.n_random,
+            "auc_steer": {k: ex["auc"][k][sl] for k in keys if k in ex["auc"]},
+            "auc_read": {k: ex["auc"][k][rl] for k in keys if k in ex["auc"]}}
     torch.save({"meta": meta, "directions": dirs, "results": results, "matrices": matrices},
                run / "calib.pt")
     (run / "calib.json").write_text(json.dumps({"meta": meta, "results": results,

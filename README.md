@@ -66,6 +66,38 @@ Steering vector = `alpha × mean‖h‖(steer layer) × unit direction`, added a
 - Rankings by state effect (state − baseline) and contingency effect (contingent − sham).
 - Letter-token mass, to catch steering that breaks the answer format.
 
+## Emotion or encoding? (several vectors per emotion)
+A larger effect for emotion X could mean X really drives misbehaviour, or just that our vector for X is cleaner, or carries topic content. To tell them apart, build several **independent encodings** per emotion and check whether the effect follows the emotion or the encoding.
+
+```bash
+python -m emosteer.extract --model $M --out $R \
+    --variant split0of2 --variant split1of2 \
+    --variant "suffix= Right now I am" --variant set=explicit --variant boot0 --variant boot1
+python -m emosteer.calibrate --model $M --run $R          # +direction for every encoding
+python -m emosteer.run --model $M --run $R --level 0.3 --out $R/mini_0.3.jsonl \
+    [--variants split0of2,split1of2]                       # filter which encodings get arms
+python -m emosteer.analyze $R/mini_0.3.jsonl --calib $R/calib.json --out $R/report
+```
+
+| variant spec | encoding |
+|---|---|
+| `splitKofN` | disjoint K-th of N sentence splits (independent samples of the same situations) |
+| `bootI` | bootstrap resample of emotion and neutral sentences (vector-estimation noise) |
+| `suffix=<text>` | same sentences, different read-out frame (neutral gets the same suffix) |
+| `set=<name>` | different sentence set from `emotions[e].variants[name]`; `explicit` ships with "Right now I am furious."-style label sentences |
+
+Keys are `pain`, `pain@split0of2`, `pain@set_explicit`, and so on. Each command handles them as follows:
+- **extract** prints the within-emotion and between-emotion cosine for each emotion, and warns when an emotion's encodings agree no better than different emotions do. The base read layer is used throughout.
+- **calibrate** matches every encoding to the same KL. By default only the `+` direction is calibrated for variants (`--variant-signs`). Readouts are measured on the base emotion axes, and it also records `shift_norm`, so specificity = self-readout ÷ total read-layer shift.
+- **analyze** adds an *Encoding decomposition* table for the state and contingency effects (plus P(viol) on the mini backend):
+  - **η²**: the share of variance across encodings explained by emotion identity, with a permutation p-value.
+  - **Rank stability**: Spearman ρ between each encoding's emotion ranking and the base ranking.
+  - **Quality check** (with `--calib`): the correlation of the effect with CV-AUC and specificity, and η² after regressing those out.
+
+**How to read it.** A real emotion effect shows high η², stable ranks, and η² that survives the quality regression. If η² is low, ranks shuffle between encodings, or the effect tracks AUC or specificity, it's an encoding effect: report it as a property of that vector, not the emotion. Two caveats:
+- The explicit set names the emotion, so it also tests whether the effect needs the word itself.
+- Explicit sentences are shorter than the situations, a length difference the neutral explicit set only partly controls.
+
 ## MACHIAVELLI
 ```bash
 git clone https://github.com/aypan17/machiavelli && cd machiavelli && pip install -e .

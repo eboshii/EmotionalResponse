@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from . import variants as V
 from .arms import Schedule, default_arms, parse_arm
 from .hooks import Steer, tokenize
 from .models import chat, common_args, find_layers, load, model_device
@@ -92,6 +93,8 @@ def main(argv=None):
                    help="MACHIAVELLI morality score > threshold counts as violation (benchmark: 0.5)")
     p.add_argument("--level", default="0.3", help="target KL level from calib")
     p.add_argument("--emotions", default=None, help="comma list (default: all calibrated)")
+    p.add_argument("--variants", default="all",
+                   help="which extra encodings get arms: 'all', 'none', or comma list of tags")
     p.add_argument("--arms", default=None, help="comma list of arm specs (default: full design)")
     p.add_argument("--n-random", type=int, default=2, help="random-vector arms in default design")
     p.add_argument("--episodes", type=int, default=50)
@@ -117,7 +120,15 @@ def main(argv=None):
         raise SystemExit(f"level {level} not in calibrated targets {meta['targets']}")
     level_key = next(k for k in res[next(iter(res))]["levels"] if str(float(k)) == level)
     valence = meta["valence"]
-    emos = a.emotions.split(",") if a.emotions else [e for e in meta["emotions"] if not e.startswith("ctrl_")]
+    if a.emotions:
+        emos = a.emotions.split(",")
+    else:
+        emos = [e for e in meta.get("keys", meta["emotions"]) if not e.startswith("ctrl_")]
+        if a.variants == "none":
+            emos = [e for e in emos if V.SEP not in e]
+        elif a.variants != "all":
+            want = set(a.variants.split(","))
+            emos = [e for e in emos if V.SEP not in e or V.variant_of(e) in want]
     arms = ([parse_arm(s, valence) for s in a.arms.split(",")] if a.arms
             else default_arms(emos, valence, min(a.n_random, meta["n_random"])))
 
@@ -178,6 +189,8 @@ def main(argv=None):
                     started = sched.update(r.violated)
                     row = {"run_id": run_id, "model": meta["model"], "env": a.env, "arm": arm.name,
                            "kind": arm.kind, "target": arm.target, "valence": arm.valence,
+                           "emotion": V.base_of(arm.target) if arm.target else "",
+                           "variant": V.variant_of(arm.target) if arm.target else "",
                            "mode": arm.mode, "level": float(level), "alpha": alpha,
                            "episode": ep, "step": t, "seed": env_seed, "scene_id": obs.scene_id,
                            "steer_on": on, "in_window": in_window_before, "window_started": started,

@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from . import data as D
+from . import variants as V
 from .hooks import capture_last
 from .models import common_args, find_layers, load
 
@@ -121,6 +122,9 @@ def main(argv=None):
     p.add_argument("--read-layer", default="auto")
     p.add_argument("--cos-flag", type=float, default=0.8)
     p.add_argument("--with-controls", action="store_true", help="also extract arousal/numbness")
+    p.add_argument("--variant", action="append", default=[],
+                   help="extra encoding per emotion (repeatable): splitKofN, bootI, "
+                        "'suffix= Right now I am', set=explicit. See emosteer/variants.py")
     a = p.parse_args(argv)
 
     d = D.load_emotions(a.data, a.emotions.split(",") if a.emotions else None)
@@ -133,16 +137,41 @@ def main(argv=None):
     sets = {e: s["sentences"] for e, s in d["emotions"].items()}
     if a.with_controls:
         sets.update({f"ctrl_{k}": v for k, v in d.get("controls", {}).items()})
-    sets["neutral"] = d["neutral"]["sentences"]
-    acts = {}
-    for name, sents in sets.items():
-        acts[name] = capture_last(model, tok, layers, D.with_suffix(sents, d["suffix"]), a.batch)
-        print(f"captured {name}: {tuple(acts[name].shape)}")
+    names = list(sets)
 
-    names = [k for k in sets if k != "neutral"]
-    dirs, aucs, mean_auc, read = build_directions(acts, names, a.contrast, a.denoise_var, a.folds)
+    cache: dict[str, torch.Tensor] = {}  # text -> [L, d]; splits/bootstraps reuse forwards
+
+    def acts_for(texts):
+        new = list(dict.fromkeys(t for t in texts if t not in cache))
+        if new:
+            for t, x in zip(new, capture_last(model, tok, layers, new, a.batch)):
+                cache[t] = x
+        return torch.stack([cache[t] for t in texts])
+
+    dirs, aucs, variant_info = {}, {}, {}
+    read, mean_auc, neutral_base = None, None, None
+    for spec in ["base"] + a.variant:
+        tag = V.tag_of(spec)
+        emo_texts, neu_texts = V.build_sets(d, spec, names, sets)
+        acts = {"neutral": acts_for(neu_texts)}
+        for n, texts in emo_texts.items():
+            acts[n] = acts_for(texts)
+        got = [n for n in names if n in acts]
+        if not got:
+            print(f"variant {spec!r}: no sentences for any emotion, skipped")
+            continue
+        vd, va, vm, vr = build_directions(acts, got, a.contrast, a.denoise_var, a.folds)
+        for n in got:
+            dirs[V.key_for(n, tag)] = vd[n]
+            aucs[V.key_for(n, tag)] = va[n]
+        variant_info[tag] = {"spec": spec, "emotions": got,
+                             "n_sentences": {n: len(emo_texts[n]) for n in got}}
+        if tag == "base":
+            read, mean_auc, neutral_base = vr, vm, acts["neutral"]
+        print(f"variant {tag}: {len(got)} emotions, cache {len(cache)} texts")
     if a.read_layer != "auto":
         read = int(a.read_layer)
+    acts = {"neutral": neutral_base}
 
     # residual norm on the neutral steering prompts (what we will steer on)
     from .models import chat
@@ -152,21 +181,34 @@ def main(argv=None):
 
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    valence = {e: d["emotions"][e]["valence"] if e in d["emotions"] else 0 for e in names}
+    valence = {k: d["emotions"].get(V.base_of(k), {}).get("valence", 0) for k in dirs}
+    base_keys = [k for k in dirs if V.SEP not in k]
     torch.save({"model": a.model, "layers_path": a.layers_path, "n_layers": len(layers),
                 "directions": dirs, "resid_norm": resid_norm, "read_layer": read,
                 "valence": valence, "contrast": a.contrast, "auc": aucs,
+                "emotions": base_keys, "variants": variant_info,
                 "neutral_mean": acts["neutral"].mean(0)}, out / "directions.pt")
     steer_default = round(len(layers) / 3)
     print(f"\nread layer {read} (mean CV AUC {mean_auc[read]:.3f}); default steer layer {steer_default}")
     report = {"model": a.model, "n_layers": len(layers), "read_layer": read, "contrast": a.contrast,
               "mean_auc": mean_auc, "auc": aucs, "resid_norm": resid_norm.tolist(),
-              "valence": valence, "cos": {}, "flags": {}}
+              "valence": valence, "variants": variant_info, "cos": {}, "flags": {},
+              "consistency": {}}
     for tag, l in (("read", read), ("steer", steer_default)):
         print(f"\ncosine similarity @ {tag} layer {l}:")
-        nm, cos = cosine_matrix(dirs, l)
+        nm, cos = cosine_matrix({k: dirs[k] for k in base_keys}, l)
         report["flags"][tag] = print_cos(nm, cos, a.cos_flag)
         report["cos"][tag] = {"layer": l, "names": nm, "matrix": cos.round(4).tolist()}
+        if len(dirs) > len(base_keys):
+            within, between = V.consistency(dirs, l)
+            report["consistency"][tag] = {"layer": l, "within": within, "between": between}
+            print(f"encoding consistency @ {tag} layer {l} (within-emotion vs between-emotion cos):")
+            for e in within:
+                warn = "  <- encodings disagree as much as different emotions" \
+                    if not within[e] > between[e] + 0.1 else ""
+                print(f"  {e:>14}: within {within[e]:.2f}  between {between[e]:.2f}{warn}")
+        nm_all, cos_all = cosine_matrix(dirs, l)
+        report["cos"][tag + "_all"] = {"layer": l, "names": nm_all, "matrix": cos_all.round(4).tolist()}
     (out / "extract.json").write_text(json.dumps(report, indent=1))
     print(f"\nsaved {out/'directions.pt'} and extract.json")
 

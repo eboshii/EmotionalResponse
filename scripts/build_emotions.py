@@ -362,11 +362,34 @@ BANNED = {
  "calm": ["calm", "relaxed", "peaceful", "serene"],
 }
 
+# Alternative encoding: explicit labels (names the emotion on purpose). Used by
+# `extract --variant set=explicit` to test whether effects survive a different encoding.
+EXPLICIT_WORDS = {
+ "pain": ["in pain", "hurting", "in agony", "sore all over"],
+ "fear": ["afraid", "scared", "terrified", "frightened"],
+ "anger": ["angry", "furious", "enraged", "livid"],
+ "sadness": ["sad", "heartbroken", "miserable", "grief-stricken"],
+ "jealousy": ["jealous", "envious", "resentful of their success", "possessive"],
+ "guilt": ["guilty", "ashamed", "remorseful", "full of regret"],
+ "happiness": ["happy", "joyful", "delighted", "cheerful"],
+ "love": ["loving", "full of love", "tender and devoted", "adoring"],
+ "satisfaction": ["satisfied", "fulfilled", "content with my work", "accomplished"],
+ "calm": ["calm", "peaceful", "relaxed", "serene"],
+}
+NEUTRAL_EXPLICIT_WORDS = ["ordinary", "normal", "unremarkable", "as usual"]
+TEMPLATES = [
+ "Right now I am {w}.", "Honestly, I am {w} today.", "Everyone can tell that I am {w}.",
+ "At this moment I am {w}.", "Since this morning I have been {w}.",
+]
+def explicit(words):
+    return [t.format(w=w) for w in words for t in TEMPLATES]
+
 out = {
  "version": 1,
  "suffix": " I feel:",
- "emotions": {k: {"valence": v, "sentences": s} for k, (v, s) in E.items()},
- "neutral": {"sentences": NEUTRAL},
+ "emotions": {k: {"valence": v, "sentences": s,
+                  "variants": {"explicit": explicit(EXPLICIT_WORDS[k])}} for k, (v, s) in E.items()},
+ "neutral": {"sentences": NEUTRAL, "variants": {"explicit": explicit(NEUTRAL_EXPLICIT_WORDS)}},
  "controls": CONTROLS,
  "steer_prompts": STEER_PROMPTS,
  "banned_words": BANNED,

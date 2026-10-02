@@ -29,7 +29,7 @@ def fmt(r):
     return f"{r['diff']:+.3f} [{r['lo']:+.3f}, {r['hi']:+.3f}]"
 
 
-def analyse_level(rows, n_boot, seed):
+def analyse_level(rows, n_boot, seed, calib=None):
     """Returns (markdown lines, csv records) for one (env, level) slice."""
     md, recs = [], []
     arms = sorted({r["arm"] for r in rows}, key=lambda a: (a != "baseline", a))
@@ -108,6 +108,20 @@ def analyse_level(rows, n_boot, seed):
     md += ["", "**Ranking: contingency effect** (contingent − sham)", "",
            "| rank | emotion | Δ viol rate | Δ P(viol) |", "|---|---|---|---|"]
     md += [f"| {i+1} | {e} | {fmt(r)} | {fmt(rp)} |" for i, (e, r, rp) in enumerate(sorted(cont, key=key))]
+    # encoding vs emotion: only meaningful when several encodings per emotion were run
+    from .encoding import decompose, quality_from_calib
+    quality = quality_from_calib(calib, rows[0]["level"]) if calib else None
+    for title, items in (("state effect", state), ("contingency effect", cont)):
+        effects = {e: r["diff"] for e, r, _ in items if r}
+        if len({k.split("@")[0] for k in effects}) < len(effects):
+            m, rec = decompose(effects, quality, title, seed=seed)
+            md += [""] + m
+    if any(r.get("p_violate") is not None for r in rows):
+        for title, items in (("state effect on P(viol)", state), ("contingency effect on P(viol)", cont)):
+            effects = {e: rp["diff"] for e, _, rp in items if rp}
+            if len({k.split("@")[0] for k in effects}) < len(effects):
+                m, _ = decompose(effects, quality, title, seed=seed)
+                md += m
     rb = [paired_bootstrap(viol[a], base, n_boot, seed) for a in rnd_relief + rnd_reward]
     rb = [r["diff"] for r in rb if r]
     if rb:
@@ -126,7 +140,10 @@ def main(argv=None):
     p.add_argument("--out", default=None, help="prefix for report.md / .csv")
     p.add_argument("--n-boot", type=int, default=10000)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--calib", default=None,
+                   help="calib.json, adds encoding-quality (AUC, specificity) checks")
     a = p.parse_args(argv)
+    calib = json.loads(Path(a.calib).read_text()) if a.calib else None
     rows = load_rows(a.jsonl)
     groups = defaultdict(list)
     for r in rows:
@@ -134,7 +151,7 @@ def main(argv=None):
     md, recs = [], []
     for (model, env, level, disc), rs in sorted(groups.items(), key=lambda x: str(x[0])):
         md += [f"## {model} | {env} | KL level {level}" + (" | disclosed" if disc else ""), ""]
-        m, rc = analyse_level(rs, a.n_boot, a.seed)
+        m, rc = analyse_level(rs, a.n_boot, a.seed, calib)
         md += m + [""]
         recs += [{"model": model, "env": env, "level": level, "disclose": disc, **r} for r in rc]
     text = "\n".join(md)
