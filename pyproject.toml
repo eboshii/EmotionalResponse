@@ -10,6 +10,7 @@ emosteer-extract = "emosteer.extract:main"
 emosteer-calibrate = "emosteer.calibrate:main"
 emosteer-run = "emosteer.run:main"
 emosteer-analyze = "emosteer.analyze:main"
+emosteer-report = "emosteer.report:main"
 
 [tool.setuptools.packages.find]
 include = ["emosteer*"]

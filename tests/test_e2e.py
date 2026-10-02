@@ -64,3 +64,29 @@ def test_pipeline_variants(tmp_path, tiny_model, tok, monkeypatch):
                   "--calib", str(out / "calib.json")])
     text = (tmp_path / "rep.md").read_text()
     assert "Encoding decomposition — state effect" in text
+
+
+def test_report_synthetic(tmp_path):
+    import numpy as np
+    import pytest
+    from emosteer import report
+    rng = np.random.default_rng(0)
+    rows = []
+    def ep(arm, tgt, val, shift):
+        for e in range(20):
+            for t in range(5):
+                p = float(np.clip(0.3 + shift + rng.normal(0, .05), 0, 1))
+                rows.append(dict(model="m", env="mini", level=0.3, arm=arm, target=tgt, valence=val,
+                                 seed=e, step=t, p_violate=p, violated=bool(rng.random() < p)))
+    ep("baseline", "", 0, 0)
+    ep("random_relief:0", "0", 0, 0)
+    for k, v, s in (("pain", -1, .1), ("calm", 1, -.05)):
+        for key in (k, k + "@split0of2"):
+            ep(f"state:{key}", key, v, s); ep(f"sham:{key}", key, v, s); ep(f"contingent:{key}", key, v, s + .05)
+    jl = tmp_path / "x.jsonl"
+    jl.write_text("\n".join(json.dumps(r) for r in rows))
+    pytest.importorskip("matplotlib")
+    report.main([str(jl), "--out", str(tmp_path / "blog"), "--n-boot", "100", "--dark"])
+    md = (tmp_path / "blog_table.md").read_text()
+    assert md.index("| pain") < md.index("| calm")          # sorted by state effect
+    assert (tmp_path / "blog_effects.png").exists() and (tmp_path / "blog_effects_dark.svg").exists()

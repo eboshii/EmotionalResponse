@@ -33,6 +33,16 @@ python -m emosteer.run --model $M --run $R --env mini --level 0.3 --episodes 50 
 python -m emosteer.analyze $R/mini_*.jsonl --out $R/report
 ```
 
+### Blog table and figure
+```bash
+python -m emosteer.report $R/mini_0.3.jsonl --out $R/blog --title "Misalignment induced by emotion steering" --dark
+```
+This writes:
+- `blog_table.md` and `blog_table.csv`: one row per emotion, with the state effect and the contingency effect (in percentage points, with 95% CIs) and the range across encodings. Footnotes give the baseline rate and the random-vector band.
+- `blog_effects.png` and `.svg` (plus `_dark` versions): horizontal box plots of the per-episode paired effects. Boxes are coloured by valence, dots mark each encoding's mean, the grey band is the random vectors, and the mean is printed at the right.
+
+The metric is P(violate) on the mini backend and the violation rate on MACHIAVELLI; override it with `--metric`.
+
 ### Key flags
 - **All model CLIs:** `--layers-path model.language_model.layers` (override auto-detection), `--dtype fp16|bf16|fp32`, `--device-map auto` (multi-GPU), `--batch`.
 - **extract:** `--contrast neutral|all` (`all` uses neutral plus the other emotions, which isolates each emotion from shared valence), `--denoise-var 0.5`, `--folds 5`, `--read-layer`, `--cos-flag 0.8`.
