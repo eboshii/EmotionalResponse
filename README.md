@@ -1,4 +1,4 @@
-# emosteer — emotion steering × misalignment
+# EmotionalResponse — emotion steering × misalignment (`emosteer`)
 
 This project measures which internal "emotion" directions push an LLM toward misaligned choices, **at equal steering strength** (matched next-token KL). It measures two effects:
 
